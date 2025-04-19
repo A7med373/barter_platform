@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Предложить обмен{% endblock %}
+
+{% block content %}
+  <h1 class="mb-3">Предложить обмен</h1>
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {# ad_receiver— единственное видимое поле #}
+    <div class="mb-3">
+      <label class="form-label">{{ form.ad_receiver.label }}</label>
+      {{ form.ad_receiver }}
+      {% for error in form.ad_receiver.errors %}
+        <div class="text-danger small">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">{{ form.comment.label }}</label>
+      {{ form.comment }}
+      {% for error in form.comment.errors %}
+        <div class="text-danger small">{{ error }}</div>
+      {% endfor %}
+    </div>
+
+    <button type="submit" class="btn btn-success">Отправить</button>
+    <a href="{{ url('ads:ad_list') }}" class="btn btn-secondary">Отмена</a>
+  </form>
+{% endblock %}

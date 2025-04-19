@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}{{ ad.title }}{% endblock %}
+{% block content %}
+  <h1 class="mb-3">{{ ad.title }}</h1>
+
+  {% if ad.image %}
+    <img src="{{ ad.image.url }}" class="img-fluid mb-3" alt="{{ ad.title }}">
+  {% endif %}
+
+  <dl class="row">
+    <dt class="col-sm-3">Категория</dt>
+    <dd class="col-sm-9">{{ ad.category }}</dd>
+
+    <dt class="col-sm-3">Состояние</dt>
+    <dd class="col-sm-9">{{ ad.get_condition_display() }}</dd>
+
+    <dt class="col-sm-3">Описание</dt>
+    <dd class="col-sm-9">{{ ad.description }}</dd>
+
+    <dt class="col-sm-3">Автор</dt>
+    <dd class="col-sm-9">{{ ad.user.username }}</dd>
+
+    <dt class="col-sm-3">Опубликовано</dt>
+    <dd class="col-sm-9">{{ ad.created_at.strftime("%d.%m.%Y %H:%M") }}</dd>
+  </dl>
+
+  {% if request.user == ad.user %}
+    <a href="{{ url('ads:ad_edit', pk=ad.id) }}" class="btn btn-primary me-2">Редактировать</a>
+    <a href="{{ url('ads:ad_delete', pk=ad.id) }}" class="btn btn-danger">Удалить</a>
+  {% elif request.user.is_authenticated %}
+    <a href="{{ url('ads:proposal_create', ad_id=ad.id) }}" class="btn btn-success">
+      Предложить обмен
+    </a>
+  {% else %}
+    <p class="text-muted">Войдите, чтобы предложить обмен.</p>
+  {% endif %}
+{% endblock %}

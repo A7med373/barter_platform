@@ -21,7 +21,7 @@ class Ad(models.Model):
     )
     title = models.CharField("Заголовок", max_length=120)
     description = models.TextField("Описание")
-    image_url = models.URLField("URL изображения", blank=True)
+    image = models.ImageField("Изображение", upload_to="ads/", blank=True, null=True)
     category = models.CharField("Категория", max_length=60)
     condition = models.CharField(
         "Состояние",
