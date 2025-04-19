@@ -142,6 +142,8 @@ venv.bak/
 .idea/
 *.idea
 *.iml
+staticfiles/
+collected_static/
 
 # Spyder project settings
 .spyderproject
