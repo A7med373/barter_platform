@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Навигационное меню -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="{% url 'ads:ad_list' %}">Объявления</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'ads:ad_create' %}">Создать объявление</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'ads:proposal_list' %}">Мои предложения</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:profile' %}">Профиль</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:logout' %}">Выйти</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <h2>Мои предложения обмена</h2>
+    
+    <!-- Фильтры -->
+    <div class="mb-4">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label for="status" class="form-label">Статус</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">Все</option>
+                    <option value="pending" {% if request.GET.status == 'pending' %}selected{% endif %}>Ожидает</option>
+                    <option value="accepted" {% if request.GET.status == 'accepted' %}selected{% endif %}>Принято</option>
+                    <option value="rejected" {% if request.GET.status == 'rejected' %}selected{% endif %}>Отклонено</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="type" class="form-label">Тип</label>
+                <select name="type" id="type" class="form-select">
+                    <option value="">Все</option>
+                    <option value="sent" {% if request.GET.type == 'sent' %}selected{% endif %}>Отправленные</option>
+                    <option value="received" {% if request.GET.type == 'received' %}selected{% endif %}>Полученные</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-primary w-100">Применить фильтры</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Список предложений -->
+    <div class="row">
+        {% for proposal in proposals %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a href="{% url 'ads:proposal_detail' proposal.pk %}" class="text-decoration-none">
+                            Предложение #{{ proposal.id }}
+                        </a>
+                    </h5>
+                    <p class="card-text">
+                        <strong>Статус:</strong> 
+                        <span class="badge {% if proposal.status == 'pending' %}bg-warning{% elif proposal.status == 'accepted' %}bg-success{% else %}bg-danger{% endif %}">
+                            {{ proposal.get_status_display }}
+                        </span>
+                    </p>
+                    <p class="card-text">
+                        <strong>От:</strong> {{ proposal.ad_sender.user.username }}<br>
+                        <strong>Кому:</strong> {{ proposal.ad_receiver.user.username }}
+                    </p>
+                    <p class="card-text">
+                        <strong>Объявление:</strong> {{ proposal.ad_sender.title }}
+                    </p>
+                    <div class="mt-3">
+                        <a href="{% url 'ads:proposal_detail' proposal.pk %}" class="btn btn-primary">
+                            Подробнее
+                        </a>
+                        {% if proposal.status == 'pending' and proposal.ad_receiver.user == user %}
+                        <a href="{% url 'ads:proposal_update' proposal.pk %}" class="btn btn-success">
+                            Ответить
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Предложений не найдено
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %} 

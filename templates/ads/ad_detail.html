@@ -1,13 +1,21 @@
 {% extends "base.html" %}
 {% block title %}{{ ad.title }}{% endblock %}
+
 {% block content %}
-  <h1 class="mb-3">{{ ad.title }}</h1>
+  <h1 class="mb-4">{{ ad.title }}</h1>
 
   {% if ad.image %}
-    <img src="{{ ad.image.url }}" class="img-fluid mb-3" alt="{{ ad.title }}">
+    <div class="mb-4 text-center">
+      <img
+        src="{{ ad.image.url }}"
+        alt="{{ ad.title }}"
+        class="img-fluid rounded"
+        style="max-width: 600px; max-height: 400px; width: auto; height: auto;"
+      >
+    </div>
   {% endif %}
 
-  <dl class="row">
+  <dl class="row mb-4 fs-5">
     <dt class="col-sm-3">Категория</dt>
     <dd class="col-sm-9">{{ ad.category }}</dd>
 
@@ -15,23 +23,55 @@
     <dd class="col-sm-9">{{ ad.get_condition_display() }}</dd>
 
     <dt class="col-sm-3">Описание</dt>
-    <dd class="col-sm-9">{{ ad.description }}</dd>
+    <dd class="col-sm-9 lead">{{ ad.description }}</dd>
 
     <dt class="col-sm-3">Автор</dt>
     <dd class="col-sm-9">{{ ad.user.username }}</dd>
 
     <dt class="col-sm-3">Опубликовано</dt>
-    <dd class="col-sm-9">{{ ad.created_at.strftime("%d.%m.%Y %H:%M") }}</dd>
+    <dd class="col-sm-9">{{ ad.created_at|date("d.m.Y H:i") }}</dd>
   </dl>
 
-  {% if request.user == ad.user %}
-    <a href="{{ url('ads:ad_edit', pk=ad.id) }}" class="btn btn-primary me-2">Редактировать</a>
-    <a href="{{ url('ads:ad_delete', pk=ad.id) }}" class="btn btn-danger">Удалить</a>
-  {% elif request.user.is_authenticated %}
-    <a href="{{ url('ads:proposal_create', ad_id=ad.id) }}" class="btn btn-success">
-      Предложить обмен
-    </a>
-  {% else %}
-    <p class="text-muted">Войдите, чтобы предложить обмен.</p>
+  <div class="mb-4">
+    {% if request.user == ad.user %}
+      <a href="{{ url('ads:ad_edit', pk=ad.id) }}" class="btn btn-primary me-2">Редактировать</a>
+      <a href="{{ url('ads:ad_delete', pk=ad.id) }}" class="btn btn-danger">Удалить</a>
+    {% elif request.user.is_authenticated %}
+      <a href="{{ url('ads:proposal_create', ad_id=ad.id) }}"
+         class="btn btn-success">Предложить обмен</a>
+    {% else %}
+      <p class="text-muted">Войдите, чтобы предложить обмен.</p>
+    {% endif %}
+  </div>
+
+  {% if request.user.is_authenticated and request.user != ad.user %}
+    <div class="card mb-4">
+      <div class="card-header">
+        <h5 class="mb-0">Ваши объявления для обмена</h5>
+      </div>
+      <div class="card-body">
+        {% if user_ads %}
+          <form method="post" action="{{ url('ads:proposal_create', ad_id=ad.id) }}">
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
+            <div class="mb-3">
+              <label for="id_ad_receiver" class="form-label">Выберите ваше объявление для обмена:</label>
+              <select name="ad_receiver" id="id_ad_receiver" class="form-select">
+                {% for user_ad in user_ads %}
+                  <option value="{{ user_ad.id }}">{{ user_ad.title }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="id_comment" class="form-label">Комментарий к предложению:</label>
+              <textarea name="comment" id="id_comment" class="form-control" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Отправить предложение</button>
+          </form>
+        {% else %}
+          <p class="text-muted">У вас нет объявлений для обмена. Создайте объявление, чтобы предложить обмен.</p>
+          <a href="{{ url('ads:ad_create') }}" class="btn btn-primary">Создать объявление</a>
+        {% endif %}
+      </div>
+    </div>
   {% endif %}
 {% endblock %}

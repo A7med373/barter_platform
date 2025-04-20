@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Мои предложения обмена</h1>
+
+    <!-- Фильтры -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="btn-group" role="group">
+                <a href="?filter=sent" class="btn btn-outline-primary {% if request.GET.filter == 'sent' %}active{% endif %}">
+                    Отправленные
+                </a>
+                <a href="?filter=received" class="btn btn-outline-primary {% if request.GET.filter == 'received' %}active{% endif %}">
+                    Полученные
+                </a>
+                <a href="?" class="btn btn-outline-primary {% if not request.GET.filter %}active{% endif %}">
+                    Все
+                </a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="btn-group" role="group">
+                <a href="?status=pending" class="btn btn-outline-secondary {% if request.GET.status == 'pending' %}active{% endif %}">
+                    Ожидающие
+                </a>
+                <a href="?status=accepted" class="btn btn-outline-success {% if request.GET.status == 'accepted' %}active{% endif %}">
+                    Принятые
+                </a>
+                <a href="?status=declined" class="btn btn-outline-danger {% if request.GET.status == 'declined' %}active{% endif %}">
+                    Отклоненные
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Список предложений -->
+    <div class="row">
+        {% for proposal in proposals %}
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <span class="badge bg-{{ proposal.status|status_color }}">
+                        {{ proposal.get_status_display() }}
+                    </span>
+                    <small class="text-muted float-end">
+                        {{ proposal.created_at|date("d.m.Y H:i") }}
+                    </small>
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Обмен</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6>Ваше объявление:</h6>
+                            <p>{{ proposal.ad_sender.title }}</p>
+                            <a href="{{ url('ads:ad_detail', pk=proposal.ad_sender.pk) }}" class="btn btn-sm btn-outline-primary">
+                                Просмотреть
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Предложенное объявление:</h6>
+                            <p>{{ proposal.ad_receiver.title }}</p>
+                            <a href="{{ url('ads:ad_detail', pk=proposal.ad_receiver.pk) }}" class="btn btn-sm btn-outline-primary">
+                                Просмотреть
+                            </a>
+                        </div>
+                    </div>
+                    {% if proposal.comment %}
+                    <p class="card-text mt-3">
+                        <strong>Комментарий:</strong> {{ proposal.comment }}
+                    </p>
+                    {% endif %}
+                </div>
+                <div class="card-footer">
+                    {% if proposal.ad_receiver.user == user and proposal.status == 'pending' %}
+                    <a href="{{ url('ads:proposal_update', pk=proposal.pk) }}" class="btn btn-primary">
+                        Изменить статус
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                Предложений обмена не найдено.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+            </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %} 
