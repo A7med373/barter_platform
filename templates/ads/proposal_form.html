@@ -1,30 +1,46 @@
+{# templates/ads/proposal_form.html #}
 {% extends "base.html" %}
 {% block title %}Предложить обмен{% endblock %}
 
 {% block content %}
-  <h1 class="mb-3">Предложить обмен</h1>
+  <h1 class="mb-3">Выберите своё объявление для обмена</h1>
 
-  <form method="post">
-    {% csrf_token %}
-    {{ form.non_field_errors }}
-    {# ad_receiver— единственное видимое поле #}
-    <div class="mb-3">
-      <label class="form-label">{{ form.ad_receiver.label }}</label>
-      {{ form.ad_receiver }}
-      {% for error in form.ad_receiver.errors %}
-        <div class="text-danger small">{{ error }}</div>
-      {% endfor %}
-    </div>
+  {# Flash‑сообщения, если есть #}
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
 
-    <div class="mb-3">
-      <label class="form-label">{{ form.comment.label }}</label>
-      {{ form.comment }}
-      {% for error in form.comment.errors %}
-        <div class="text-danger small">{{ error }}</div>
-      {% endfor %}
-    </div>
+  {# Если у пользователя есть какие‑то свои объявления (кроме current) #}
+  {% if form.ad_receiver.field.queryset %}
+    <form method="post" class="mt-3">
+      {{ csrf_field(request) }}
 
-    <button type="submit" class="btn btn-success">Отправить</button>
-    <a href="{{ url('ads:ad_list') }}" class="btn btn-secondary">Отмена</a>
-  </form>
+      {# === Здесь поле ad_receiver === #}
+      <div class="mb-4">
+        <label class="form-label">{{ form.ad_receiver.label }}</label>
+        {{ form.ad_receiver }}
+        {% for error in form.ad_receiver.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      {# === А это уже комментарий === #}
+      <div class="mb-4">
+        <label class="form-label" for="{{ form.comment.id_for_label }}">
+          {{ form.comment.label }}
+        </label>
+        {{ form.comment }}
+        {% for error in form.comment.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn btn-success">Отправить</button>
+      <a href="{{ url('ads:ad_detail', pk=ad.id) }}" class="btn btn-secondary">Отмена</a>
+    </form>
+  {% else %}
+    <p class="text-muted">У вас нет других объявлений для обмена.</p>
+  {% endif %}
 {% endblock %}

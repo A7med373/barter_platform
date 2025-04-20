@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Детали предложения обмена</h2>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Ваше объявление</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h6>{{ object.ad_receiver.title }}</h6>
+                                    <p class="text-muted">{{ object.ad_receiver.description }}</p>
+                                    <p><strong>Категория:</strong> {{ object.ad_receiver.category }}</p>
+                                    <p><strong>Состояние:</strong> {{ object.ad_receiver.condition }}</p>
+                                    <a href="{{ url('ads:ad_detail', pk=object.ad_receiver.pk) }}" class="btn btn-sm btn-outline-primary">
+                                        Просмотреть объявление
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>Предложенное объявление</h5>
+                                </div>
+                                <div class="card-body">
+                                    <h6>{{ object.ad_sender.title }}</h6>
+                                    <p class="text-muted">{{ object.ad_sender.description }}</p>
+                                    <p><strong>Категория:</strong> {{ object.ad_sender.category }}</p>
+                                    <p><strong>Состояние:</strong> {{ object.ad_sender.condition }}</p>
+                                    <a href="{{ url('ads:ad_detail', pk=object.ad_sender.pk) }}" class="btn btn-sm btn-outline-primary">
+                                        Просмотреть объявление
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if object.comment %}
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Комментарий к предложению</h5>
+                        </div>
+                        <div class="card-body">
+                            <p>{{ object.comment }}</p>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>Статус предложения</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-3">
+                                <strong>Статус:</strong> 
+                                <span class="badge {% if object.status == 'pending' %}bg-warning{% elif object.status == 'accepted' %}bg-success{% else %}bg-danger{% endif %}">
+                                    {{ object.status }}
+                                </span>
+                            </p>
+                            <p><strong>Дата создания:</strong> {{ object.created_at|strftime('%d.%m.%Y %H:%M') }}</p>
+                            
+                            {% if object.ad_receiver.user == user and object.status == 'pending' %}
+                            <a href="{{ url('ads:proposal_update', pk=object.pk) }}" class="btn btn-primary">
+                                Изменить статус
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <a href="{{ url('ads:proposal_list') }}" class="btn btn-outline-secondary">
+                            Вернуться к списку предложений
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
