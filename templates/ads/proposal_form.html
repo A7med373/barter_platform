@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Предложить обмен{% endblock %}
+
+{% block content %}
+  <h1 class="mb-3">Выберите своё объявление для обмена</h1>
+
+  {# Flash‑сообщения, если есть #}
+  {% if messages %}
+    {% for msg in messages %}
+      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+
+  {# Если у пользователя есть какие‑то свои объявления (кроме current) #}
+  {% if form.ad_receiver.field.queryset %}
+    <form method="post" class="mt-3">
+      {{ csrf_field(request) }}
+
+      {# === Здесь поле ad_receiver === #}
+      <div class="mb-4">
+        <label class="form-label">{{ form.ad_receiver.label }}</label>
+        {{ form.ad_receiver }}
+        {% for error in form.ad_receiver.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      {# === А это уже комментарий === #}
+      <div class="mb-4">
+        <label class="form-label" for="{{ form.comment.id_for_label }}">
+          {{ form.comment.label }}
+        </label>
+        {{ form.comment }}
+        {% for error in form.comment.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn btn-success">Отправить</button>
+      <a href="{{ url('ads:proposal_list') }}" class="btn btn-secondary">Отмена</a>
+    </form>
+  {% else %}
+    <p class="text-muted">У вас нет других объявлений для обмена.</p>
+  {% endif %}
+{% endblock %}

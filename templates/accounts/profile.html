@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set context = get_context(request) %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Профиль пользователя</h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Имя пользователя:</strong> {{ context.user.username }}</p>
+                    <p><strong>Email:</strong> {{ context.user.email }}</p>
+                    <p><strong>Дата регистрации:</strong> {{ context.user.date_joined|strftime('%d.%m.%Y') }}</p>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url('ads:ad_list') }}" class="btn btn-primary">К объявлениям</a>
+                        <a href="{{ url('ads:proposal_list') }}" class="btn btn-secondary">Мои предложения</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Вход{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Вход</h1>
+
+  {% if form.errors %}
+    <div class="alert alert-danger">
+      Проверьте имя пользователя и пароль.
+    </div>
+  {% endif %}
+
+  <form method="post" novalidate>
+    {% csrf_token %}
+    <div class="mb-3">
+      <label class="form-label" for="id_username">Логин</label>
+      {{ form.username }}
+    </div>
+    <div class="mb-3">
+      <label class="form-label" for="id_password">Пароль</label>
+      {{ form.password }}
+    </div>
+    <button class="btn btn-primary" type="submit">Войти</button>
+  </form>
+{% endblock %}

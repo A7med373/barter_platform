@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+  <h1 class="mb-4">Регистрация</h1>
+
+  <form method="post" class="w-50 mw-100" novalidate>
+    {{ csrf_field(request) }}
+
+    {# non-field errors #}
+    {% for err in form.non_field_errors() %}
+      <div class="alert alert-danger">{{ err }}</div>
+    {% endfor %}
+
+    {% for field in form %}
+      <div class="mb-3">
+        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}   {# просто так, с атрибутом class="form-control" из формы #}
+        {% for error in field.errors %}
+          <div class="text-danger small">{{ error }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+
+    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+    <a href="{{ url('login') }}?next={{ request.path }}" class="btn btn-link">Уже есть аккаунт?</a>
+  </form>
+{% endblock %}
