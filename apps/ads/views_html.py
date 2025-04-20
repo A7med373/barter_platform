@@ -45,7 +45,8 @@ class AdDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.user.is_authenticated and self.request.user != self.object.user:
-            context['user_ads'] = Ad.objects.filter(user=self.request.user)
+            # Исключаем текущее объявление из списка
+            context['user_ads'] = Ad.objects.filter(user=self.request.user).exclude(pk=self.object.pk)
         return context
 
 
@@ -83,21 +84,29 @@ class AdDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 class ProposalCreateView(LoginRequiredMixin, CreateView):
     form_class = ProposalForm
-    template_name = "ads/proposal_form.html"
-    success_url = reverse_lazy("ads:ad_list")
+    success_url = reverse_lazy("ads:proposal_list")
 
     def get_ad(self):
         return get_object_or_404(Ad, pk=self.kwargs["ad_id"])
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["ad_sender"] = self.get_ad()
+        ad_sender = self.get_ad()
+        kwargs["ad_sender"] = ad_sender
+        kwargs["user"] = self.request.user  # Добавляем текущего пользователя
+        print("Form kwargs:", kwargs)  # Отладочная информация
+        print("Available ads for user:", Ad.objects.filter(user=self.request.user).values_list('id', flat=True))
         return kwargs
 
-    def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx["ad"] = self.get_ad()
-        return ctx
+    def post(self, request, *args, **kwargs):
+        print("POST data:", request.POST)  # Отладочная информация
+        form = self.get_form()
+        print("Form queryset:", form.fields['ad_receiver'].queryset.values_list('id', flat=True))  # Отладочная информация
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            print("Form errors:", form.errors)  # Отладочная информация
+            return self.form_invalid(form)
 
     def form_valid(self, form):
         ad_sender = self.get_ad()
@@ -105,13 +114,20 @@ class ProposalCreateView(LoginRequiredMixin, CreateView):
         try:
             self.object = form.save()
             messages.success(self.request, "Предложение отправлено.")
-            return redirect("ads:ad_detail", pk=ad_sender.pk)
-        except IntegrityError:
+            return redirect("ads:proposal_list")
+        except IntegrityError as e:
+            print("IntegrityError:", str(e))  # Отладочная информация
             messages.error(self.request, "Вы уже отправляли такое предложение.")
             return redirect("ads:ad_detail", pk=ad_sender.pk)
 
     def form_invalid(self, form):
         ad_sender = self.get_ad()
-        for err in form.non_field_errors():
-            messages.error(self.request, err)
+        for field, errors in form.errors.items():
+            for error in errors:
+                messages.error(self.request, f"{error}")
         return redirect("ads:ad_detail", pk=ad_sender.pk)
+
+    def get(self, request, *args, **kwargs):
+        """При GET-запросе перенаправляем на страницу объявления"""
+        ad = self.get_ad()
+        return redirect("ads:ad_detail", pk=ad.pk)

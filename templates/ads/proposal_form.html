@@ -1,4 +1,3 @@
-{# templates/ads/proposal_form.html #}
 {% extends "base.html" %}
 {% block title %}Предложить обмен{% endblock %}
 
@@ -38,7 +37,7 @@
       </div>
 
       <button type="submit" class="btn btn-success">Отправить</button>
-      <a href="{{ url('ads:ad_detail', pk=ad.id) }}" class="btn btn-secondary">Отмена</a>
+      <a href="{{ url('ads:proposal_list') }}" class="btn btn-secondary">Отмена</a>
     </form>
   {% else %}
     <p class="text-muted">У вас нет других объявлений для обмена.</p>
